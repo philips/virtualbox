@@ -13,13 +13,26 @@ module VirtualBox
       # expand to "c:\" and some expand to "C:\" and cause the same file to
       # be loaded twice. Uck.
 
+      require_files = []
       initial_files.each do |file|
-        require File.expand_path(file, dir).downcase
+        require_files.push(File.expand_path(file, dir))
       end
 
       # Glob require the rest
       Dir[File.join(dir, "**", "*.rb")].each do |f|
-        require File.expand_path(f).downcase
+        require_files.push(File.expand_path(f))
+      end
+
+      downcased = [] 
+      final_list = require_files.inject([]) { |result,h|
+          unless downcased.include?(h.downcase);
+            result << h
+            downcased << h.downcase
+          end;
+        result}
+
+      final_list.each do |file|
+        require file
       end
     end
   end
